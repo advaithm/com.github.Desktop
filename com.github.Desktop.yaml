@@ -1,4 +1,4 @@
-app-id: com.github.Desktop
+app-id: com.github.shiftkey.Github_desktop
 base: org.electronjs.Electron2.BaseApp
 base-version: '20.08'
 runtime: org.freedesktop.Platform
@@ -12,13 +12,15 @@ finish-args:
   - --share=ipc
   - --socket=x11
   - --socket=pulseaudio
+  - --sokcet=ssh-auth
   - --share=network
   - --device=all
+  - --device=dri
   - --filesystem=home
   - --talk-name=org.freedesktop.Notifications
-  # - --env=XDG_CURRENT_DESKTOP=Unity
-  # - --talk-name=org.kde.StatusNotifierWatcher
-  # - --talk-name=com.canonical.AppMenu.Registrar
+  - --filesystem=xdg-run/keyring
+  - --talk-name=org.freedesktop.secrets
+  - --talk-name=org.freedesktop.Notifications
 modules:
   - shared-modules/libsecret/libsecret.json
 
@@ -47,24 +49,37 @@ modules:
         # Skip Electron related downloads
         ELECTRON_SKIP_BINARY_DOWNLOAD: 'true'
         CHROMEDRIVER_SKIP_DOWNLOAD: 'true'
-        # Use predownloaded node-sass binary
-        SASS_BINARY_PATH: '/run/build/github-desktop/flatpak-node/node-sass/linux-x64-72_binding.node'
         # Use predownloaded dugite-native
         DUGITE_CACHE_DIR: '/run/build/github-desktop/flatpak-node/tmp'
     build-commands:
       - 'HOME=$PWD yarn config --offline set yarn-offline-mirror $FLATPAK_BUILDER_BUILDDIR/flatpak-node/yarn-mirror'
       - 'yarn --offline --verbose'
       # Run electron-builder, passing the architecture arguments to it.
-      - '. flatpak-node/electron-builder-arch-args.sh; yarn run --offline build:prod $ELECTRON_BUILDER_ARCH_ARGS'
+      - '. flatpak-node/electron-builder-arch-args.sh --offline; yarn run --offline build:prod $ELECTRON_BUILDER_ARCH_ARGS'
       # Copy the resulting, unpacked directory to /app.
       # (A glob is used because the directory name may contain the current arch.)
       - 'cp -r dist/github-desktop-linux-* /app/github-desktop'
       # Install the wrapper script to start it.
       - 'install -Dm 755 start-github-desktop.sh /app/bin/start-github-desktop'
+    post-install:
+      - install -Dm644 app/static/logos/32x32.png  /app/share/icons/hicolor/32x32/apps/$FLATPAK_ID.png
+      - install -Dm644 app/static/logos/64x64.png  /app/share/icons/hicolor/64x64/apps/$FLATPAK_ID.png
+      - install -Dm644 app/static/logos/128x128.png  /app/share/icons/hicolor/128x128/apps/$FLATPAK_ID.png
+      - install -Dm644 app/static/logos/256x256.png  /app/share/icons/hicolor/256x256/apps/$FLATPAK_ID.png
+      - install -Dm644 app/static/logos/512x512.png  /app/share/icons/hicolor/512x512/apps/$FLATPAK_ID.png
+      - install -D com.github.shiftkey.Github_desktop.desktop -t /app/share/applications/
+      - install -D  com.github.shiftkey.Github_desktop.metainfo.xml -t /app/share/metainfo/
     sources:
       - type: git
         url: https://github.com/shiftkey/desktop.git
-        commit: 236402dba329a5e83f03d1b1320479c7ef54af93
+        branch: linux
+        commit: e08f8d46dcaa512812bdab3a7360164930118bc8
+      
+      - type: file
+        path: com.github.shiftkey.Github_desktop.desktop
+      
+      - type: file
+        path: com.github.shiftkey.Github_desktop.metainfo.xml
 
       - type: patch
         paths:
@@ -73,14 +88,7 @@ modules:
 
       - generated-sources.json
 
-      - type: file
-        url: https://github.com/sass/node-sass/releases/download/v4.13.1/linux-x64-72_binding.node
-        sha256: 958cccff6b88220a93c1a4c52c7260cbf2cfe9b259ba88e612b4347b14bc4936
-        dest: flatpak-node/node-sass
-        only-arches:
-          - x86_64
-
       - type: script
         dest-filename: start-github-desktop.sh
         commands:
-          - '/app/github-desktop/github-desktop'
+          - 'zypak-wrapper /app/github-desktop/github-desktop $@'

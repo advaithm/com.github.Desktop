@@ -2,3 +2,5 @@
 /build
 /repo
 /desktop
+build-dir
+.flatpak
