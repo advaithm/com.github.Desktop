@@ -5,7 +5,7 @@ runtime: org.freedesktop.Platform
 runtime-version: '20.08'
 sdk: org.freedesktop.Sdk
 sdk-extensions:
-  - org.freedesktop.Sdk.Extension.node12
+  - org.freedesktop.Sdk.Extension.node14
 command: start-github-desktop
 separate-locales: false
 finish-args:
@@ -38,10 +38,10 @@ modules:
     buildsystem: simple
     build-options:
       # Add the node bin directory & yarn directory.
-      append-path: '/usr/lib/sdk/node12/bin:/app/yarn/bin:/run/build/github-desktop/flatpak-node/chromedriver'
+      append-path: '/usr/lib/sdk/node14/bin:/app/yarn/bin:/run/build/github-desktop/flatpak-node/chromedriver'
       env:
         # Sets the directory where Node is located so way npm won't download the headers.
-        npm_config_nodedir: '/usr/lib/sdk/node12'
+        npm_config_nodedir: '/usr/lib/sdk/node14'
         # Set the Electron cache directory.
         ELECTRON_CACHE: '/run/build/github-desktop/flatpak-node/electron-cache'
         # Skip Electron related downloads
@@ -64,7 +64,7 @@ modules:
     sources:
       - type: git
         url: https://github.com/shiftkey/desktop.git
-        commit: 236402dba329a5e83f03d1b1320479c7ef54af93
+        commit: 87a25c91786ca156b1fd4c9f78bd59293f01dc28
 
       - type: patch
         paths:
@@ -72,13 +72,6 @@ modules:
           - patches/0002-flatpak-Set-electron-get-cacheRoot-to-flatpak-node-d.patch
 
       - generated-sources.json
-
-      - type: file
-        url: https://github.com/sass/node-sass/releases/download/v4.13.1/linux-x64-72_binding.node
-        sha256: 958cccff6b88220a93c1a4c52c7260cbf2cfe9b259ba88e612b4347b14bc4936
-        dest: flatpak-node/node-sass
-        only-arches:
-          - x86_64
 
       - type: script
         dest-filename: start-github-desktop.sh
