@@ -10,15 +10,16 @@ command: start-github-desktop
 separate-locales: false
 finish-args:
   - --share=ipc
-  - --socket=x11
+  - --socket=wayland
+  - --socket=fallback-x11
   - --socket=pulseaudio
+  - --socket=ssh-auth
   - --share=network
   - --device=all
   - --filesystem=home
+  - --filesystem=xdg-run/keyring
+  - --talk-name=org.freedesktop.secrets
   - --talk-name=org.freedesktop.Notifications
-  # - --env=XDG_CURRENT_DESKTOP=Unity
-  # - --talk-name=org.kde.StatusNotifierWatcher
-  # - --talk-name=com.canonical.AppMenu.Registrar
 modules:
   - shared-modules/libsecret/libsecret.json
 
@@ -45,16 +46,15 @@ modules:
         # Set the Electron cache directory.
         ELECTRON_CACHE: '/run/build/github-desktop/flatpak-node/electron-cache'
         # Skip Electron related downloads
-        ELECTRON_SKIP_BINARY_DOWNLOAD: 'true'
+        ELECTRON_SKIP_BINARY_DOWNLOAD: '1'
         CHROMEDRIVER_SKIP_DOWNLOAD: 'true'
-        # Use predownloaded node-sass binary
-        SASS_BINARY_PATH: '/run/build/github-desktop/flatpak-node/node-sass/linux-x64-72_binding.node'
         # Use predownloaded dugite-native
         DUGITE_CACHE_DIR: '/run/build/github-desktop/flatpak-node/tmp'
     build-commands:
       - 'HOME=$PWD yarn config --offline set yarn-offline-mirror $FLATPAK_BUILDER_BUILDDIR/flatpak-node/yarn-mirror'
       - 'yarn --offline --verbose'
       # Run electron-builder, passing the architecture arguments to it.
+      - 'echo here'
       - '. flatpak-node/electron-builder-arch-args.sh; yarn run --offline build:prod $ELECTRON_BUILDER_ARCH_ARGS'
       # Copy the resulting, unpacked directory to /app.
       # (A glob is used because the directory name may contain the current arch.)
