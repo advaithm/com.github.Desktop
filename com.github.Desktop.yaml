@@ -90,4 +90,4 @@ modules:
       - type: script
         dest-filename: start-github-desktop.sh
         commands:
-          - 'zypak-wrapper /app/github-desktop/github-desktop'
+          - 'zypak-wrapper /app/github-desktop/github-desktop "$@"'

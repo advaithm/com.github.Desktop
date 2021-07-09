@@ -1,6 +1,6 @@
 [Desktop Entry]
 Name=GitHub Desktop
-Exec=start-github-desktop
+Exec=start-github-desktop %U
 Terminal=false
 Type=Application
 Icon=com.github.Desktop
